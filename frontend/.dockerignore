@@ -1,0 +1,11 @@
+# 本机依赖会覆盖容器内由 npm ci 安装的 Linux 可执行文件。
+node_modules
+dist
+.vite
+
+# 开发与敏感文件无需进入前端镜像构建上下文。
+.git
+.vscode
+.env
+.env.*
+npm-debug.log*

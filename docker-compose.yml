@@ -1,0 +1,85 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: knowledge-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?Please set MYSQL_ROOT_PASSWORD in .env}
+      - MYSQL_DATABASE=knowledge_assistant
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - knowledge-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: knowledge-backend
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/knowledge_assistant?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:?Please set MYSQL_ROOT_PASSWORD in .env}
+      - JWT_SECRET=${JWT_SECRET:?Please set JWT_SECRET in .env}
+      - AI_AGENT_BASE_URL=http://ai-agent:8000
+      - APP_UPLOAD_DIR=/app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - knowledge-network
+    restart: unless-stopped
+
+  ai-agent:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    container_name: knowledge-ai-agent
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:?error}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - CHROMA_PERSIST_DIR=/app/chroma_data
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      - SPRING_BOOT_URL=http://backend:8080
+    volumes:
+      - chroma_data:/app/chroma_data
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - knowledge-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: knowledge-frontend
+    ports:
+      - "${PUBLIC_HTTP_PORT:-80}:80"
+    depends_on:
+      - backend
+      - ai-agent
+    networks:
+      - knowledge-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+  chroma_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  knowledge-network:
+    driver: bridge

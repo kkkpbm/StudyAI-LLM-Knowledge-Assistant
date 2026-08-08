@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ka.mapper.NoteMapper">
+    <resultMap id="NoteResult" type="com.ka.entity.Note">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="contentMd" column="content_md"/>
+        <result property="contentPlain" column="content_plain"/>
+        <result property="summary" column="summary"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="status" column="status"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectPageWithTags" resultMap="NoteResult">
+        SELECT DISTINCT n.* FROM notes n
+        LEFT JOIN note_tags nt ON n.id = nt.note_id
+        WHERE n.user_id = #{userId}
+            AND n.deleted = 0
+        <if test="categoryId != null">
+            AND n.category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (n.title LIKE CONCAT('%', #{keyword}, '%') OR n.content_plain LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY n.updated_at DESC
+    </select>
+</mapper>

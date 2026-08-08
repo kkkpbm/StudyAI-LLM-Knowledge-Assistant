@@ -1,0 +1,19 @@
+# 宝塔站点「配置文件」示例。
+# 使用前替换 example.com / www.example.com；同时将 .env 中 PUBLIC_HTTP_PORT 改为 127.0.0.1:8088。
+server {
+    listen 80;
+    server_name example.com www.example.com;
+
+    # 证书申请完成后，宝塔会自动生成 443 监听和证书配置。
+    client_max_body_size 10m;
+
+    location / {
+        proxy_pass http://127.0.0.1:8088;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+    }
+}
