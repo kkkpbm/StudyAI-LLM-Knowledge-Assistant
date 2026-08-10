@@ -1,4 +1,4 @@
-package com.ka.config;
+﻿package com.ka.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
@@ -20,3 +20,4 @@ public class MetaObjectHandlerConfig implements MetaObjectHandler {
         this.strictUpdateFill(metaObject, "updatedAt", LocalDateTime.class, LocalDateTime.now());
     }
 }
+

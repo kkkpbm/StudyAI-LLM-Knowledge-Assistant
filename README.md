@@ -14,6 +14,7 @@ Knowledge Atlas 面向个人学习场景，解决传统笔记“记完难检索�
 **项目亮点：**
 
 - **三层解耦**：Vue 3 前端、Spring Boot 业务后端、FastAPI AI Agent 独立部署；Spring Boot 通过 WebClient 代理 AI 服务 SSE 流。
+- **模块化单体后端**：业务代码按领域聚合到 `module` 根目录；每个模块独立维护 `controller / domain / mapper / service`，在保持单体部署简单性的同时降低功能间耦合。
 - **本地向量 RAG**：Sentence Transformers 本地生成嵌入，ChromaDB 持久化检索；笔记检索与聊天记忆检索并行执行，并返回可追溯的笔记来源。
 - **学习闭环**：资料/笔记 → 向量化与知识图谱 → AI 问答/闪卡 → SM-2 复习提醒 → 学习计划与周报。
 
@@ -30,6 +31,8 @@ Knowledge Atlas 面向个人学习场景，解决传统笔记“记完难检索�
 | 个人中心 | 学习数据概览、学习时长趋势、知识分类分布、头像上传 |
 
 ## 系统架构
+
+![StudyAI 系统架构图](./docs/images/architecture.svg)
 
 ```mermaid
 flowchart LR
@@ -87,8 +90,8 @@ sequenceDiagram
 | ChromaDB 存储与本地嵌入 | [embedding_service.py](./ai-agent/app/services/embedding_service.py) · [vector_store.py](./ai-agent/app/services/vector_store.py) |
 | 对话记忆双通道检索 | [chat_memory_service.py](./ai-agent/app/services/chat_memory_service.py) |
 | PDF / DOCX / TXT / Markdown 解析 | [documents.py](./ai-agent/app/routers/documents.py) |
-| 文档导入状态工作流 | [DocumentWorkflowServiceImpl.java](./backend/src/main/java/com/ka/service/impl/DocumentWorkflowServiceImpl.java) |
-| SSE 代理转发 | [AiController.java](./backend/src/main/java/com/ka/controller/AiController.java) · [AiAgentClientImpl.java](./backend/src/main/java/com/ka/service/impl/AiAgentClientImpl.java) |
+| 文档导入状态工作流 | [DocumentWorkflowServiceImpl.java](./backend/src/main/java/com/ka/module/document/service/impl/DocumentWorkflowServiceImpl.java) |
+| SSE 代理转发 | [AiController.java](./backend/src/main/java/com/ka/module/ai/controller/AiController.java) · [AiAgentClientImpl.java](./backend/src/main/java/com/ka/module/ai/service/impl/AiAgentClientImpl.java) |
 | SM-2 复习算法 | [review_service.py](./ai-agent/app/services/review_service.py) |
 | AI 对话模式切换 | [AiAssistant/Index.vue](./frontend/src/views/AiAssistant/Index.vue) |
 
@@ -175,7 +178,16 @@ uvicorn app.main:app --reload --port 8000
 ```text
 .
 ├── frontend/                 # Vue 3 前端
-├── backend/                  # Spring Boot 业务后端
+├── backend/                  # Spring Boot 模块化单体后端
+│   └── src/main/java/com/ka/
+│       ├── module/           # 按业务领域组织
+│       │   ├── auth/ user/ chat/
+│       │   ├── knowledge/    # 笔记、分类、标签、知识图谱
+│       │   ├── learning/     # 计划、学习记录、SM-2 复习
+│       │   ├── ai/ document/ dashboard/
+│       │   └── */(controller|domain|mapper|service)
+│       ├── common/ config/ security/
+│       └── KnowledgeApplication.java
 ├── ai-agent/                 # FastAPI + LangChain AI Agent
 ├── deploy/                   # 生产部署示例与说明
 ├── docs/                     # 架构、截图与补充文档

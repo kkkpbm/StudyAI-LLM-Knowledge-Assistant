@@ -1,4 +1,4 @@
-package com.ka.common;
+﻿package com.ka.common;
 
 import lombok.Getter;
 
@@ -16,3 +16,4 @@ public class BusinessException extends RuntimeException {
         this.code = 500;
     }
 }
+

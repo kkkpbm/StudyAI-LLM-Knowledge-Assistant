@@ -1,4 +1,4 @@
-package com.ka.config;
+﻿package com.ka.config;
 
 import com.ka.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
@@ -46,3 +46,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

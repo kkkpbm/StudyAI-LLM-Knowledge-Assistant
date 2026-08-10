@@ -1,4 +1,4 @@
-package com.ka.config;
+﻿package com.ka.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -23,3 +23,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations(location);
     }
 }
+

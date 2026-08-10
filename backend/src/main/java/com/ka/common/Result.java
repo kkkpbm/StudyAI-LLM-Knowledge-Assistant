@@ -1,4 +1,4 @@
-package com.ka.common;
+﻿package com.ka.common;
 
 import lombok.Data;
 
@@ -31,3 +31,4 @@ public class Result<T> {
         return error(500, message);
     }
 }
+

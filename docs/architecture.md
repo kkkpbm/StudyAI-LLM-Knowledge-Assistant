@@ -9,6 +9,27 @@
 | `ai-agent` | RAG、向量化、知识图谱、文档解析、SM-2、学习计划生成 | Docker 内部 `8000` |
 | `mysql` | 用户、笔记、标签、计划、复习、聊天记录等业务数据 | Docker 内部 `3306` |
 
+## 后端模块化单体
+
+Spring Boot 仍以一个应用、一个进程部署，但不再按全局 `controller`、`mapper`、`service` 平铺代码；而是以业务领域为边界组织：
+
+```text
+com.ka
+├── module
+│   ├── auth/                 # 注册、登录、JWT 签发
+│   ├── user/                 # 资料、头像、学习统计
+│   ├── knowledge/            # 笔记、分类、标签、知识图谱
+│   ├── learning/             # 计划、学习记录、SM-2 复习
+│   ├── chat/                 # 对话历史
+│   ├── ai/                   # AI 接口与 FastAPI Client
+│   ├── document/             # 文档解析确认工作流
+│   └── dashboard/            # 学习总览聚合查询
+├── common/ config/ security/ # 跨模块基础能力
+└── KnowledgeApplication.java
+```
+
+除聚合型模块外，每个模块在内部按 `controller / domain / mapper / service` 分层。跨模块只通过服务接口或 Mapper 的必要查询协作，避免将业务类散落到全局技术分层目录。
+
 ## RAG 策略
 
 知识库问答时，AI Agent 使用线程池并行执行两类检索：
@@ -44,7 +65,7 @@ stateDiagram-v2
 相关实现：
 
 - [`ai-agent/app/routers/documents.py`](../ai-agent/app/routers/documents.py)
-- [`backend/src/main/java/com/ka/service/impl/DocumentWorkflowServiceImpl.java`](../backend/src/main/java/com/ka/service/impl/DocumentWorkflowServiceImpl.java)
+- [`backend/src/main/java/com/ka/module/document/service/impl/DocumentWorkflowServiceImpl.java`](../backend/src/main/java/com/ka/module/document/service/impl/DocumentWorkflowServiceImpl.java)
 - [`frontend/src/views/Notes/Index.vue`](../frontend/src/views/Notes/Index.vue)
 
 ## SSE 流式转发
@@ -53,6 +74,6 @@ stateDiagram-v2
 
 相关实现：
 
-- [`backend/src/main/java/com/ka/controller/AiController.java`](../backend/src/main/java/com/ka/controller/AiController.java)
-- [`backend/src/main/java/com/ka/service/impl/AiAgentClientImpl.java`](../backend/src/main/java/com/ka/service/impl/AiAgentClientImpl.java)
+- [`backend/src/main/java/com/ka/module/ai/controller/AiController.java`](../backend/src/main/java/com/ka/module/ai/controller/AiController.java)
+- [`backend/src/main/java/com/ka/module/ai/service/impl/AiAgentClientImpl.java`](../backend/src/main/java/com/ka/module/ai/service/impl/AiAgentClientImpl.java)
 - [`frontend/nginx.conf`](../frontend/nginx.conf)

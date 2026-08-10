@@ -1,4 +1,4 @@
-package com.ka.common;
+﻿package com.ka.common;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -37,3 +37,4 @@ public class GlobalExceptionHandler {
         return Result.error("Internal server error");
     }
 }
+

@@ -1,4 +1,4 @@
-package com.ka.config;
+﻿package com.ka.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -16,3 +16,4 @@ public class MyBatisPlusConfig {
         return interceptor;
     }
 }
+
